@@ -44,6 +44,8 @@ app_license = "mit"
 
 # include js in doctype views
 # doctype_js = {"doctype" : "public/js/doctype.js"}
+doctype_js = {"Shift Allocation Tool" : "public/js/download_button.js"}
+
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -144,7 +146,11 @@ app_license = "mit"
 # 		"on_trash": "method"
 # 	}
 # }
-
+doc_events = {
+    "Shift Allocation Tool": {
+        "on_submit": "gps.api.process_shift_excel"
+    }
+}
 # Scheduled Tasks
 # ---------------
 
