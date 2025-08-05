@@ -148,7 +148,7 @@ doctype_js = {"Shift Allocation Tool" : "public/js/download_button.js"}
 # }
 doc_events = {
     "Shift Allocation Tool": {
-        "on_submit": "gps.api.process_shift_excel"
+        "on_submit": "shift_allocation_from_excel.api.process_shift_excel"
     }
 }
 # Scheduled Tasks

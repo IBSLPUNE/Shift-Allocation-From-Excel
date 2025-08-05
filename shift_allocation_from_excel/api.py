@@ -1,123 +1,144 @@
 import frappe
 import openpyxl
 from frappe.utils import getdate, add_days
+from datetime import datetime
 from collections import defaultdict
 
-def process_shift_excel(doc, method):
-    if not doc.shift:
-        frappe.throw("Please attach the Excel file in the 'shift' field.")
+def add_wo_to_holiday_list(start_date, end_date, employee_id, holiday_list_name):
+    holiday_list = frappe.get_doc("Holiday List", holiday_list_name)
+    existing_dates = {h.holiday_date for h in holiday_list.holidays}
 
+    date = getdate(start_date)
+    end = getdate(end_date)
+    added = False
+
+    while date <= end:
+        if date not in existing_dates:
+            day_name = date.strftime("%A")
+            holiday_list.append("holidays", {
+                "holiday_date": date,
+                "weekly_off": 1,
+                "description": f"{day_name} Weekly Off"
+            })
+            added = True
+        date = add_days(date, 1)
+
+    if added:
+        holiday_list.save()
+
+def process_shift_excel(doc, method):
     try:
         file_doc = frappe.get_doc("File", {"file_url": doc.shift})
         file_path = file_doc.get_full_path()
-    except Exception as e:
+    except Exception:
         frappe.log_error(frappe.get_traceback(), "❌ Failed to retrieve Excel file")
         frappe.throw("Could not retrieve or read the attached file.")
 
-    try:
-        wb = openpyxl.load_workbook(file_path)
-        ws = wb.active
-    except Exception as e:
-        frappe.log_error(frappe.get_traceback(), "❌ Failed to open Excel workbook")
-        frappe.throw("Failed to read Excel file.")
+    wb = openpyxl.load_workbook(file_path)
+    sheet = wb.active
 
-    all_rows = []
-    for row in ws.iter_rows(min_row=2, values_only=True):
-        if not row or not row[0] or not row[1] or not row[2]:
+    processed, skipped = 0, 0
+    date_headers = []
+
+    for col in range(4, sheet.max_column + 1):
+        val = sheet.cell(row=1, column=col).value
+        if not val:
             continue
-        employee = str(row[0]).strip()
-        shift = str(row[2]).strip().upper()
-        date = getdate(row[1])
-        all_rows.append((employee, date, shift))
-
-    # Sort by employee and date
-    all_rows.sort()
-
-    current_emp = None
-    current_shift = None
-    start_date = None
-    last_date = None
-
-    for entry in all_rows:
-        emp, date, shift = entry
-
-        if shift == "W/O":
-            try:
-                add_holiday(emp, date.strftime("%Y-%m-%d"))
-            except Exception as e:
-                frappe.log_error(frappe.get_traceback(), f"❌ Failed to add holiday for {emp} on {date}")
-                raise
-            continue
-
-        if (emp == current_emp and shift == current_shift and
-                date == add_days(last_date, 1)):
-            # Extend current shift block
-            last_date = date
-        else:
-            # Submit previous block if exists
-            if current_emp and current_shift:
-                try:
-                    create_shift_assignment(current_emp, current_shift,
-                                            start_date.strftime("%Y-%m-%d"),
-                                            last_date.strftime("%Y-%m-%d"))
-                except Exception as e:
-                    frappe.log_error(frappe.get_traceback(),
-                                     f"❌ Failed to create shift assignment for {current_emp}")
-                    raise
-            # Start new block
-            current_emp = emp
-            current_shift = shift
-            start_date = last_date = date
-
-    # Final group
-    if current_emp and current_shift:
         try:
-            create_shift_assignment(current_emp, current_shift,
-                                    start_date.strftime("%Y-%m-%d"),
-                                    last_date.strftime("%Y-%m-%d"))
+            date_headers.append(getdate(val))
+        except Exception:
+            frappe.log_error(f"Invalid date format in header: {val}", "Shift Upload")
+            frappe.throw(f"Invalid date header: {val}")
+
+    employee_holiday_map = {}
+    shift_assignments = []
+
+    for row in range(2, sheet.max_row + 1):
+        barcode_cell = sheet.cell(row=row, column=2).value
+        if not barcode_cell:
+            skipped += 1
+            continue
+
+        barcode = str(barcode_cell).strip()
+        employee_name = frappe.db.get_value("Employee", barcode)
+        if not employee_name:
+            frappe.log_error(f"Employee with barcode {barcode} not found.", "Shift Upload")
+            skipped += 1
+            continue
+
+        if employee_name not in employee_holiday_map:
+            holiday_list_name = frappe.db.get_value("Employee", employee_name, "holiday_list")
+            if not holiday_list_name:
+                frappe.log_error(f"Employee {employee_name} has no Holiday List.", "Shift Upload")
+                skipped += 1
+                continue
+            employee_holiday_map[employee_name] = holiday_list_name
+        else:
+            holiday_list_name = employee_holiday_map[employee_name]
+
+        current_shift = None
+        current_start = None
+        current_end = None
+
+        for i, date in enumerate(date_headers):
+            shift_val = sheet.cell(row=row, column=i + 4).value
+            shift_code = str(shift_val).strip().upper() if shift_val else ""
+
+            if shift_code == current_shift:
+                current_end = date
+            else:
+                if current_shift:
+                    try:
+                        if current_shift and current_shift != "WO":
+                            shift_assignments.append({
+                                "employee": employee_name,
+                                "shift_type": current_shift,
+                                "start_date": current_start,
+                                "end_date": current_end
+                            })
+                            processed += 1
+                        elif current_shift == "WO":
+                            add_wo_to_holiday_list(current_start, current_end, employee_name, holiday_list_name)
+                    except Exception:
+                        frappe.log_error(frappe.get_traceback(), f"❌ Error for employee {employee_name}")
+                        skipped += 1
+
+                current_shift = shift_code
+                current_start = date
+                current_end = date
+
+        if current_shift:
+            try:
+                if current_shift and current_shift != "WO":
+                    shift_assignments.append({
+                        "employee": employee_name,
+                        "shift_type": current_shift,
+                        "start_date": current_start,
+                        "end_date": current_end
+                    })
+                    processed += 1
+                elif current_shift == "WO":
+                    add_wo_to_holiday_list(current_start, current_end, employee_name, holiday_list_name)
+            except Exception:
+                frappe.log_error(frappe.get_traceback(), f"❌ Final shift error for employee {employee_name}")
+                skipped += 1
+
+    for data in shift_assignments:
+        try:
+            doc = frappe.get_doc({
+                "doctype": "Shift Assignment",
+                "employee": data["employee"],
+                "shift_type": data["shift_type"],
+                "start_date": data["start_date"],
+                "end_date": data["end_date"]
+            })
+            doc.insert(ignore_permissions=True)
+            doc.submit()
         except Exception as e:
-            frappe.log_error(frappe.get_traceback(),
-                             f"❌ Failed to create final shift assignment for {current_emp}")
-            raise
+            frappe.log_error(frappe.get_traceback(), f"❌ Failed to insert Shift Assignment for {data['employee']}")
+            skipped += 1
+            processed -= 1
 
-    frappe.msgprint("✅ Grouped Shift Assignments & Holidays created.")
-
-def create_shift_assignment(employee, shift_type, start_date, end_date):
-    doc = frappe.new_doc("Shift Assignment")
-    doc.update({
-        "employee": employee,
-        "shift_type": shift_type,
-        "start_date": start_date,
-        "end_date": end_date
-    })
-    doc.insert(ignore_permissions=True)
-    doc.submit()
-
-def add_holiday(employee_id, date_str):
-    try:
-        employee = frappe.get_doc("Employee", employee_id)
-        if not employee.holiday_list:
-            frappe.throw(f"No holiday list assigned for employee {employee_id}")
-
-        holiday_list = frappe.get_doc("Holiday List", employee.holiday_list)
-
-        # Skip if already present
-        if any(h.holiday_date.strftime("%Y-%m-%d") == date_str for h in holiday_list.holidays):
-            return
-
-        # Get weekday name
-        day_name = getdate(date_str).strftime("%A")
-
-        holiday_list.append("holidays", {
-            "holiday_date": date_str,
-            "weekly_off": 1,
-            "description": f"{day_name} Weekly Off from Excel"
-        })
-
-        holiday_list.save()
-
-    except Exception as e:
-        frappe.log_error(frappe.get_traceback(), f"❌ Error in add_holiday for {employee_id} on {date_str}")
-        raise
+    frappe.msgprint(f"✅ Shift assignment completed.<br>Processed: {processed}<br>Skipped: {skipped}")
 
 

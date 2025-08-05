@@ -7,7 +7,11 @@
  "field_order": [
   "section_break_i4up",
   "amended_from",
-  "shift"
+  "shift",
+  "filters_section",
+  "from_date",
+  "column_break_rzqt",
+  "to_date"
  ],
  "fields": [
   {
@@ -28,13 +32,42 @@
    "fieldname": "shift",
    "fieldtype": "Attach",
    "label": "Shift"
+  },
+  {
+   "fieldname": "filters_section",
+   "fieldtype": "Section Break",
+   "label": "Filters"
+  },
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "From date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_rzqt",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "To Date",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-08-04 11:18:50.495463",
+ "modified": "2025-08-05 15:34:46.730959",
  "modified_by": "Administrator",
  "module": "Shift Allocation From Excel",
  "name": "Shift Allocation Tool",

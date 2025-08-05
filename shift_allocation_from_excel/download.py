@@ -1,34 +1,42 @@
 import frappe
 import openpyxl
+from openpyxl.styles import Alignment, Font
 from openpyxl.utils import get_column_letter
-from frappe.utils import now_datetime
+from frappe.utils import getdate, add_days, now_datetime
 import io
 
 @frappe.whitelist()
-def download_shift_template():
-    # Create workbook and worksheet
+def download_shift_template(start_date, end_date):
+    start_date = getdate(start_date)
+    end_date = getdate(end_date)
+    total_days = (end_date - start_date).days + 1
+
     wb = openpyxl.Workbook()
     ws = wb.active
     ws.title = "Shift Template"
 
-    # Header row
-    headers = ["Employee ID", "Date", "Shift"]
-    ws.append(headers)
+    headers = ["S. No", "EMPLOYEE ID", "EMPLOYEE NAME"]
 
-    # Optional sample row
-    #ws.append(["EMP-0001", "2025-08-05", "A"])  # A = Shift Type
+    for i in range(total_days):
+        current_date = add_days(start_date, i)
+        date_str = current_date.strftime("%-d-%b-%Y")
+        headers.append(date_str)
 
-    # Adjust column widths
-    for idx, header in enumerate(headers, 1):
-        ws.column_dimensions[get_column_letter(idx)].width = 20
+    for col_idx, header in enumerate(headers, start=1):
+        cell = ws.cell(row=1, column=col_idx, value=header)
+        cell.alignment = Alignment(horizontal="center", vertical="center")
+        cell.font = Font(bold=True)
+        ws.column_dimensions[get_column_letter(col_idx)].width = 15
 
-    # Save workbook to memory
     buffer = io.BytesIO()
     wb.save(buffer)
     buffer.seek(0)
 
-    # Set binary response
-    frappe.response["filename"] = f"Shift_Template_{now_datetime().date()}.xlsx"
+    frappe.response["filename"] = f"Shift_Template_{start_date}_to_{end_date}_current_{now_datetime()}.xlsx"
     frappe.response["filecontent"] = buffer.read()
     frappe.response["type"] = "binary"
+
+
+
+
 
