@@ -10,8 +10,14 @@
   "shift",
   "filters_section",
   "from_date",
+  "branch",
+  "designation",
   "column_break_rzqt",
-  "to_date"
+  "to_date",
+  "department",
+  "employee_grade",
+  "employees_data_section",
+  "shift_allocation_employees"
  ],
  "fields": [
   {
@@ -61,13 +67,48 @@
    "in_standard_filter": 1,
    "label": "To Date",
    "reqd": 1
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "label": "Branch",
+   "options": "Branch"
+  },
+  {
+   "fieldname": "designation",
+   "fieldtype": "Link",
+   "label": "Designation",
+   "options": "Designation"
+  },
+  {
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "label": "Department",
+   "options": "Department"
+  },
+  {
+   "fieldname": "employee_grade",
+   "fieldtype": "Link",
+   "label": "Employee Grade",
+   "options": "Employee Grade"
+  },
+  {
+   "fieldname": "employees_data_section",
+   "fieldtype": "Section Break",
+   "label": "Employees Data"
+  },
+  {
+   "fieldname": "shift_allocation_employees",
+   "fieldtype": "Table",
+   "label": "Shift Allocation Employees",
+   "options": "Shift Allocation Employees"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-08-05 15:34:46.730959",
+ "modified": "2025-08-06 15:22:23.497660",
  "modified_by": "Administrator",
  "module": "Shift Allocation From Excel",
  "name": "Shift Allocation Tool",

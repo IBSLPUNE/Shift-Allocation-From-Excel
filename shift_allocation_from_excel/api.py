@@ -53,7 +53,7 @@ def process_shift_excel(doc, method):
     employee_holiday_map = {}
     shift_assignments = []
 
-    for row in range(2, sheet.max_row + 1):
+    for row in range(3, sheet.max_row + 1):
         barcode_cell = sheet.cell(row=row, column=2).value
         if not barcode_cell:
             skipped += 1
@@ -141,4 +141,24 @@ def process_shift_excel(doc, method):
 
     frappe.msgprint(f"✅ Shift assignment completed.<br>Processed: {processed}<br>Skipped: {skipped}")
 
+
+@frappe.whitelist()
+def get_employees(branch=None, department=None, designation=None,employee_grade=None, status="Active"):
+    filters = {"status": status}
+    if branch:
+        filters["branch"] = branch
+    if employee_grade:
+        filters["grade"] = employee_grade
+
+    if department:
+        filters["department"] = department
+    if designation:
+        filters["designation"] = designation
+
+    employees = frappe.get_all("Employee",
+        filters=filters,
+        fields=["name", "employee_name", "department","designation"]
+    )
+
+    return employees
 
