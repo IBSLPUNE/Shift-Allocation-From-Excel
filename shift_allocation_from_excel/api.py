@@ -162,3 +162,10 @@ def get_employees(branch=None, department=None, designation=None,employee_grade=
 
     return employees
 
+
+def validate(doc, method):
+    for row in doc.shift_allocation_employees:
+        holiday_list = frappe.db.get_value("Employee", row.employee, "holiday_list")
+        if not holiday_list:
+            frappe.throw(f"Employee <b>{row.employee} {row.employee_name}</b> does not have a Holiday List assigned.")
+

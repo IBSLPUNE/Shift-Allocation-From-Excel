@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "format:Shift-Allocation-{MM}-{#####}",
  "creation": "2025-08-01 20:18:22.364222",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -108,10 +109,11 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-08-06 15:22:23.497660",
+ "modified": "2025-08-06 21:40:56.284127",
  "modified_by": "Administrator",
  "module": "Shift Allocation From Excel",
  "name": "Shift Allocation Tool",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {
