@@ -16,6 +16,8 @@ def download_shift_template(start_date, end_date, docname):
     employees = doc.get("shift_allocation_employees") or []
 
     shift_types = [d.name for d in frappe.get_all("Shift Type")]
+    if "WO" not in shift_types:
+        shift_types.append("WO")
 
     wb = openpyxl.Workbook()
     ws = wb.active
@@ -46,7 +48,11 @@ def download_shift_template(start_date, end_date, docname):
         cell = ws.cell(row=2, column=col_idx, value=weekday)
         cell.alignment = Alignment(horizontal="center", vertical="center")
         cell.font = Font(italic=True)
-
+        if employees:
+            dv = DataValidation(type="list", formula1=f"={dv_range_name}", allow_blank=True)
+            ws.add_data_validation(dv)
+            last_row = len(employees) + 2 
+            dv.add(f"{get_column_letter(col_idx)}3:{get_column_letter(col_idx)}{last_row}")
         #dv = DataValidation(type="list", formula1=f"={dv_range_name}", allow_blank=True)
         #ws.add_data_validation(dv)
         #last_row = len(employees) + 2 
