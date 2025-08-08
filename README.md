@@ -1,5 +1,6 @@
 🔧 Objective
 To provide HR managers a convenient way to assign employee shifts in bulk through an Excel template with validations, upload capability, holiday list integration, and employee limits.
+
 1️⃣ Key Features
 ✅ Shift Allocation Tool
 Custom DocType to manage shift allocations.
@@ -103,3 +104,6 @@ Assign role-based permissions to HR Manager or HR User for:
 Reading/Writing Shift Allocation Tool
 
 Accessing Shift Type, Employee, Holiday List
+<img width="1617" height="901" alt="Screenshot 2025-08-07 124745" src="https://github.com/user-attachments/assets/8ea6c26a-ee32-4df7-8f72-d9570b6e6a14" />
+<img width="1804" height="231" alt="Screenshot 2025-08-07 125019" src="https://github.com/user-attachments/assets/3a820859-1e0c-452c-9907-535d812becd4" />
+
