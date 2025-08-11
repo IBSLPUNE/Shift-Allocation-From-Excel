@@ -6,9 +6,6 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "section_break_i4up",
-  "amended_from",
-  "shift",
   "filters_section",
   "from_date",
   "branch",
@@ -17,10 +14,67 @@
   "to_date",
   "department",
   "employee_grade",
+  "section_break_i4up",
+  "amended_from",
+  "shift",
+  "download_template",
   "employees_data_section",
   "shift_allocation_employees"
  ],
  "fields": [
+  {
+   "fieldname": "filters_section",
+   "fieldtype": "Section Break",
+   "label": "Filters"
+  },
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "From date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "label": "Branch",
+   "options": "Branch"
+  },
+  {
+   "fieldname": "designation",
+   "fieldtype": "Link",
+   "label": "Designation",
+   "options": "Designation"
+  },
+  {
+   "fieldname": "column_break_rzqt",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "To Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "label": "Department",
+   "options": "Department"
+  },
+  {
+   "fieldname": "employee_grade",
+   "fieldtype": "Link",
+   "label": "Employee Grade",
+   "options": "Employee Grade"
+  },
   {
    "fieldname": "section_break_i4up",
    "fieldtype": "Section Break"
@@ -41,57 +95,9 @@
    "label": "Shift"
   },
   {
-   "fieldname": "filters_section",
-   "fieldtype": "Section Break",
-   "label": "Filters"
-  },
-  {
-   "fieldname": "from_date",
-   "fieldtype": "Date",
-   "in_filter": 1,
-   "in_list_view": 1,
-   "in_preview": 1,
-   "in_standard_filter": 1,
-   "label": "From date",
-   "reqd": 1
-  },
-  {
-   "fieldname": "column_break_rzqt",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "to_date",
-   "fieldtype": "Date",
-   "in_filter": 1,
-   "in_list_view": 1,
-   "in_preview": 1,
-   "in_standard_filter": 1,
-   "label": "To Date",
-   "reqd": 1
-  },
-  {
-   "fieldname": "branch",
-   "fieldtype": "Link",
-   "label": "Branch",
-   "options": "Branch"
-  },
-  {
-   "fieldname": "designation",
-   "fieldtype": "Link",
-   "label": "Designation",
-   "options": "Designation"
-  },
-  {
-   "fieldname": "department",
-   "fieldtype": "Link",
-   "label": "Department",
-   "options": "Department"
-  },
-  {
-   "fieldname": "employee_grade",
-   "fieldtype": "Link",
-   "label": "Employee Grade",
-   "options": "Employee Grade"
+   "fieldname": "download_template",
+   "fieldtype": "Button",
+   "label": "Download Template"
   },
   {
    "fieldname": "employees_data_section",
@@ -109,7 +115,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-08-06 21:40:56.284127",
+ "modified": "2025-08-11 12:05:02.399459",
  "modified_by": "Administrator",
  "module": "Shift Allocation From Excel",
  "name": "Shift Allocation Tool",
