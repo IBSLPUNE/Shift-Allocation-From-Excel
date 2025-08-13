@@ -30,21 +30,30 @@ def parse_resume_direct(file_url):
         return {"status": "error", "message": str(e)}
 
 
+import pdfplumber
+
 def extract_text_from_file(file_path):
     ext = os.path.splitext(file_path)[1].lower()
     if ext == ".pdf":
-        with open(file_path, "rb") as f:
-            reader = PyPDF2.PdfReader(f)
-            return "\n".join([page.extract_text() for page in reader.pages if page.extract_text()])
+        with pdfplumber.open(file_path) as pdf:
+            return "\n".join([page.extract_text() or "" for page in pdf.pages])
     elif ext == ".docx":
         return docx2txt.process(file_path)
     else:
         frappe.throw("Unsupported file format. Please upload PDF or DOCX.")
 
 
+
 def extract_name_from_text(text):
-    lines = text.split("\n")
-    return lines[0].strip() if lines else None
+    match = re.search(r"(Mr|Ms|Mrs)\s+[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*", text)
+    if match:
+        return match.group(0).replace("Mr ", "").replace("Ms ", "").replace("Mrs ", "").strip()
+    # fallback: first non-empty line
+    for line in text.split("\n"):
+        if line.strip() and len(line.split()) <= 4:  # likely a short name
+            return line.strip()
+    return None
+
 
 
 def extract_email_from_text(text):
